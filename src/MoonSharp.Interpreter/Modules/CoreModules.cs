@@ -85,12 +85,20 @@ namespace MoonSharp.Interpreter
 		/// The "bigint" arbitrary-precision integer package (introduced by MoonSharp).
 		/// </summary>
 		BigInt = 0x20000,
+		/// <summary>
+		/// The "int64" fixed-width signed 64-bit integer package (introduced by MoonSharp).
+		/// </summary>
+		Int64 = 0x40000,
+		/// <summary>
+		/// The "uint64" fixed-width unsigned 64-bit integer package (introduced by MoonSharp).
+		/// </summary>
+		UInt64 = 0x80000,
 
 
 		/// <summary>
-		/// A sort of "hard" sandbox preset, including string, math, table, bit32, bigint packages, constants and table iterators.
+		/// A sort of "hard" sandbox preset, including string, math, table, bit32, bigint, int64, uint64 packages, constants and table iterators.
 		/// </summary>
-		Preset_HardSandbox = GlobalConsts | TableIterators | String | Table | Basic | Math | Bit32 | BigInt,
+		Preset_HardSandbox = GlobalConsts | TableIterators | String | Table | Basic | Math | Bit32 | BigInt | Int64 | UInt64,
 		/// <summary>
 		/// A softer sandbox preset, adding metatables support, error handling, coroutine, time functions, json parsing and dynamic evaluations.
 		/// </summary>
