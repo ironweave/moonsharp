@@ -287,6 +287,12 @@ namespace MoonSharp.Interpreter.Tests
 			TapRunner.Run(@"TestMore/314-regex.t");
 		}
 
+		[Test]
+		public void TestMore_315_bigint()
+		{
+			TapRunner.Run(@"TestMore/315-bigint.t");
+		}
+
 		//[Test]
 		//[Ignore]
 		//public void TestMore_320_stdin()
