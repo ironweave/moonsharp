@@ -62,11 +62,11 @@ namespace MoonSharp.Interpreter
 		/// </summary>
 		OS_Time = 0x800,
 		/// <summary>
-		/// The methods of "os" package excluding those listed for OS_Time. These are not supported under Unity.
+		/// The methods of "os" package excluding those listed for OS_Time.
 		/// </summary>
 		OS_System = 0x1000,
 		/// <summary>
-		/// The methods of "io" and "file" packages. These are not supported under Unity.
+		/// The methods of "io" and "file" packages.
 		/// </summary>
 		IO = 0x2000,
 		/// <summary>

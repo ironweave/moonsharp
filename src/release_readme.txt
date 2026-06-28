@@ -17,8 +17,6 @@ Contents:
  - /repl           -> The REPL interpreter. It's not really meant for production as much as to quickly test scripts,
                       or to compile bytecode, or for hardwiring.
 
- - /unity          -> This contains a unity package you can use in your project. It includes interpreter and vscodedebugger.
-
 
 Each directory contains C# sources and a project file. Import this in any project and you are ready to go.
 

@@ -14,7 +14,7 @@ namespace MoonSharp.Interpreter.Loaders
 			m_Error = string.Format(
 @"Loading scripts from files is not automatically supported on {0}. 
 Please implement your own IScriptLoader (possibly, extending ScriptLoaderBase for easier implementation),
-use a preexisting loader like EmbeddedResourcesScriptLoader or UnityAssetsScriptLoader or load scripts from strings.", frameworkname);
+use a preexisting loader like EmbeddedResourcesScriptLoader or load scripts from strings.", frameworkname);
 		}
 
 		public object LoadFile(string file, Table globalContext)

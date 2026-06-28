@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+        <TargetFramework>net10.0</TargetFramework>
         <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
         <Authors>MoonSharp</Authors>
         <Description>An interpreter for the Lua language</Description>
@@ -40,10 +40,6 @@
 
     <PropertyGroup Condition="'$(DebugType)' == 'portable'">
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
-        <DefineConstants>$(DefineConstants);DOTNET_CORE</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup>

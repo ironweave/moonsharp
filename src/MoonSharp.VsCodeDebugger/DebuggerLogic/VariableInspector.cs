@@ -1,4 +1,3 @@
-﻿#if (!UNITY_5) || UNITY_STANDALONE
 
 using System.Collections.Generic;
 using MoonSharp.Interpreter;
@@ -101,4 +100,3 @@ namespace MoonSharp.VsCodeDebugger.DebuggerLogic
 	}
 }
 
-#endif

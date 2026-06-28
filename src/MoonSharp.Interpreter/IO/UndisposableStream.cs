@@ -76,7 +76,6 @@ namespace MoonSharp.Interpreter.IO
 			m_Stream.Write(buffer, offset, count);
 		}
 
-#if (!(NETSTANDARD1_6))
 		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 		{
 			return m_Stream.BeginRead(buffer, offset, count, callback, state);
@@ -96,7 +95,6 @@ namespace MoonSharp.Interpreter.IO
 		{
 			return m_Stream.EndRead(asyncResult);
 		}
-#endif
 		public override bool CanTimeout
 		{
 			get { return m_Stream.CanTimeout; }

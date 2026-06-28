@@ -1,4 +1,3 @@
-﻿#if (!PCL) && ((!UNITY_5) || UNITY_STANDALONE)
 
 using System;
 using System.Collections.Generic;
@@ -300,17 +299,9 @@ namespace MoonSharp.VsCodeDebugger.DebuggerLogic
 				true
 			));
 
-#if DOTNET_CORE
 			SendText("Connected to MoonSharp {0} [{1}]",
 					 Script.VERSION,
 					 Script.GlobalOptions.Platform.GetPlatformName());
-#else
-			SendText("Connected to MoonSharp {0} [{1}] on process {2} (PID {3})",
-					 Script.VERSION,
-					 Script.GlobalOptions.Platform.GetPlatformName(),
-					 System.Diagnostics.Process.GetCurrentProcess().ProcessName,
-					 System.Diagnostics.Process.GetCurrentProcess().Id);
-#endif
 
 			SendText("Debugging multiple Lua scripts via DAP threads.");
 			SendText("Type '!help' in the Debug Console for available commands.");
@@ -1404,4 +1395,3 @@ namespace MoonSharp.VsCodeDebugger.DebuggerLogic
 	}
 }
 
-#endif

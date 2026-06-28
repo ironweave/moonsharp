@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <DefineConstants>$(DefineConstants);DOTNET_CORE;EMBEDTEST</DefineConstants>
+        <TargetFramework>net10.0</TargetFramework>
         <AssemblyName>DotNetCoreTestRunner</AssemblyName>
         <OutputType>Exe</OutputType>
         <PackageId>DotNetCoreTestRunner</PackageId>

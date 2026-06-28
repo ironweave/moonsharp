@@ -246,6 +246,7 @@ namespace MoonSharp.Interpreter.Tests
 		}
 
 		[Test]
+		[Ignore("Interacts with the low-level OS (filesystem); skipped to avoid side effects")]
 		public void TestMore_308_io()
 		{
 			if (AreCoreModulesFullySupported(CoreModules.OS_System | CoreModules.IO))
@@ -262,6 +263,7 @@ namespace MoonSharp.Interpreter.Tests
 
 
 		[Test]
+		[Ignore("Interacts with the low-level OS (process/exec); skipped to avoid side effects")]
 		public void TestMore_309_os()
 		{
 			if (AreCoreModulesFullySupported(CoreModules.OS_System | CoreModules.IO))

@@ -59,7 +59,6 @@ namespace MoonSharp.Interpreter.Execution.VM
 			m_CurrentSourceRef = (m_SourceRefStack.Count > 0) ? m_SourceRefStack[m_SourceRefStack.Count - 1] : null;
 		}
 
-	#if !UNITY_5 || UNITY_STANDALONE
 		public void Dump(string file)
 		{
 			StringBuilder sb = new StringBuilder();
@@ -74,7 +73,6 @@ namespace MoonSharp.Interpreter.Execution.VM
 
 			File.WriteAllText(file, sb.ToString());
 		}
-	#endif
 
 		public int GetJumpPointForNextInstruction()
 		{

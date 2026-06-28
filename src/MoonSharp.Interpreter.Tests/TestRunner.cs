@@ -67,10 +67,6 @@ namespace MoonSharp.Interpreter.Tests
 			types = types ?? Framework.Do.GetAssemblyTypes(asm).Where(
 				t => Framework.Do.GetCustomAttributes(t, typeof(TestFixtureAttribute), true).Any()).ToArray();
 
-#if UNITY_EDITOR_OSX
-            File.WriteAllLines(Path.GetTempPath() + Path.DirectorySeparatorChar + "types.cs", types.Select(t => t.FullName).ToArray());
-#endif
-
 			Console_WriteLine("Found {0} test types.", types.Length);
 
 			foreach (Type t in types)

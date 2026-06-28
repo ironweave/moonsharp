@@ -13,7 +13,6 @@ using NUnit.Framework;
 
 namespace MoonSharp.Interpreter.Tests
 {
-#if !EMBEDTEST
 	class TestsScriptLoader : ScriptLoaderBase
 	{
 		public override bool ScriptFileExists(string name)
@@ -26,7 +25,6 @@ namespace MoonSharp.Interpreter.Tests
 			return new FileStream(file, FileMode.Open, FileAccess.Read);
 		}
 	}
-#endif
 
 	public class TapRunner
 	{

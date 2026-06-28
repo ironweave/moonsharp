@@ -156,7 +156,7 @@ namespace MoonSharp.Interpreter.Interop
 			if (m_OptimizedGetter != null)
 				result = m_OptimizedGetter(obj);
 			else
-				result = m_Getter.Invoke(IsStatic ? null : obj, null); // convoluted workaround for --full-aot Mono execution
+				result = m_Getter.Invoke(IsStatic ? null : obj, null); // reflection fallback for AOT execution (no runtime codegen)
 
 			return ClrToScriptConversions.ObjectToDynValue(script, result);
 		}
@@ -248,7 +248,7 @@ namespace MoonSharp.Interpreter.Interop
 				}
 				else
 				{
-					m_Setter.Invoke(IsStatic ? null : obj, new object[] { value }); // convoluted workaround for --full-aot Mono execution
+					m_Setter.Invoke(IsStatic ? null : obj, new object[] { value }); // reflection fallback for AOT execution (no runtime codegen)
 				}
 			}
 			catch (ArgumentException)

@@ -119,24 +119,6 @@ namespace MoonSharp.Interpreter
 		}
 
 		/// <summary>
-		/// The purpose of this method is to convert a MoonSharp/Lua coroutine to a Unity3D coroutine.
-		/// This loops over the coroutine, discarding returned values, and returning null for each invocation.
-		/// This means however that the coroutine will be invoked each frame.
-		/// Only non-CLR coroutines can be resumed with this method. Use an overload of the Resume method accepting a ScriptExecutionContext instead.
-		/// </summary>
-		/// <returns></returns>
-		/// <exception cref="System.InvalidOperationException">Only non-CLR coroutines can be resumed with this overload of the Resume method. Use the overload accepting a ScriptExecutionContext instead</exception>
-		public System.Collections.IEnumerator AsUnityCoroutine()
-		{
-#pragma warning disable 0219
-			foreach (DynValue v in AsTypedEnumerable())
-			{
-				yield return null;
-			}
-#pragma warning restore 0219
-		}
-
-		/// <summary>
 		/// Resumes the coroutine.
 		/// Only non-CLR coroutines can be resumed with this overload of the Resume method. Use the overload accepting a ScriptExecutionContext instead.
 		/// </summary>

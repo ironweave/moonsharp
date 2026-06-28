@@ -1,5 +1,4 @@
-﻿#if DOTNET_CORE
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -167,9 +166,7 @@ namespace MoonSharp.Interpreter.Platforms
 		/// <param name="dst">The DST.</param>
 		public override void OS_FileMove(string src, string dst)
 		{
-#if (!UNITY_5) || UNITY_STANDALONE
 			File.Move(src, dst);
-#endif
 		}
 
 		/// <summary>
@@ -214,5 +211,3 @@ namespace MoonSharp.Interpreter.Platforms
 		}
 	}
 }
-
-#endif

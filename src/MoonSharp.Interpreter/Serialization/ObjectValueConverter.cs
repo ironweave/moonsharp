@@ -47,7 +47,7 @@ namespace MoonSharp.Interpreter.Serialization
 				{
 					var getter = Framework.Do.GetGetMethod(pi);
 					var isStatic = getter.IsStatic;
-					var obj = getter.Invoke(isStatic ? null : o, null); // convoluted workaround for --full-aot Mono execution
+					var obj = getter.Invoke(isStatic ? null : o, null); // reflection fallback for AOT execution (no runtime codegen)
 
 					t.Set(pi.Name, SerializeObjectToDynValue(script, obj, valueForNulls, valueForEmptyEnumerable));
 				}

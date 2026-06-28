@@ -103,7 +103,7 @@ namespace MoonSharp.Interpreter.Interop
 		{
 			this.CheckAccess(MemberDescriptorAccess.CanRead, obj);
 
-			// optimization+workaround of Unity bug..
+			// optimization: const values are resolved at descriptor build time
 			if (IsConst)
 				return ClrToScriptConversions.ObjectToDynValue(script, m_ConstValue);
 

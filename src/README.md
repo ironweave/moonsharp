@@ -7,9 +7,8 @@
 | MoonSharp.Interpreter.Tests | Test suite, mostly end to end tests of various kinds |
 | MoonSharp.RemoteDebugger | The C# project for the remote debugger |
 | MoonSharp | Sources for the REPL interpreter |
-| MoonSharpTests | Tests runner to run the tests suite outside of Visual Studio (mainly, to test in Mono). |
+| MoonSharpTests | Tests runner to run the tests suite outside of Visual Studio. |
 | PerformanceComparison | Small project acting as performance testbed and benchmark against similar projects. Code is almost always in bad state here. |
-| Unity | Unity projects are put here. As now, mainly a test runner. |
 | packages | NuGet packages of used libraries |
 | | |
 | moonsharp.sln | The solution containing everything |

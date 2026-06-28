@@ -1,5 +1,3 @@
-#if !(UNITY_5_3_OR_NEWER || UNITY_EDITOR || UNITY_STANDALONE)
-
 using System;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -35,11 +33,7 @@ namespace NUnit.Framework
                 _expectedException = expectedException;
             }
 
-            #if UNITY_5_3_OR_NEWER || UNITY_EDITOR || UNITY_STANDALONE
-            public override TestResult Execute(ITestExecutionContext context)
-            #else
             public override TestResult Execute(TestExecutionContext context)
-            #endif
             {
                 Type caughtType = null;
 
@@ -75,5 +69,3 @@ namespace NUnit.Framework
         }
     }
 }
-
-#endif
