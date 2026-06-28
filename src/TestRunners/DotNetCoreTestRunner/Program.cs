@@ -23,11 +23,11 @@ namespace DotNetCoreTestRunner
 		public const string RESTRICT_TEST = null; //"VInterop_ConstructorAndConcatMethodSemicolon_None";
 		public const string LOG_ON_FILE = "moonsharp_tests.log";
 
-		// Tests skipped on all platforms
+		// Tests skipped on all platforms.
+		// Note: TestMore_308_io / TestMore_309_os are skipped via [Ignore] on the test
+		// methods themselves (honored by both this runner and VSTest/Test Explorer).
 		static List<string> SKIPLIST = new List<string>()
 		{
-			"TestMore_308_io",	// avoid interactions with low level system
-			"TestMore_309_os",  // avoid interactions with low level system
 		};
 
 		static List<string> HARDWIRE_SKIPLIST = new List<string>()
