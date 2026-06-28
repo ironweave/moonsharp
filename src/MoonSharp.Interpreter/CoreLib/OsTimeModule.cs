@@ -121,16 +121,8 @@ namespace MoonSharp.Interpreter.CoreLib
 			}
 			else
 			{
-				try
-				{
-					reference = TimeZoneInfo.ConvertTimeFromUtc(reference, TimeZoneInfo.Local);
-					isDst = reference.IsDaylightSavingTime();
-				}
-				catch (TimeZoneNotFoundException)
-				{
-					// this catches a weird mono bug: https://bugzilla.xamarin.com/show_bug.cgi?id=11817
-					// however the behavior is definitely not correct. damn.
-				}
+				reference = TimeZoneInfo.ConvertTimeFromUtc(reference, TimeZoneInfo.Local);
+				isDst = reference.IsDaylightSavingTime();
 			}
 
 

@@ -64,8 +64,6 @@ namespace MoonSharp.Interpreter
 			m.Set("luacompat", DynValue.NewString(Script.LUA_VERSION));
 			m.Set("platform", DynValue.NewString(Script.GlobalOptions.Platform.GetPlatformName()));
 			m.Set("is_aot", DynValue.NewBoolean(Script.GlobalOptions.Platform.IsRunningOnAOT()));
-			m.Set("is_unity", DynValue.NewBoolean(PlatformAutoDetector.IsRunningOnUnity));
-			m.Set("is_mono", DynValue.NewBoolean(PlatformAutoDetector.IsRunningOnMono));
 			m.Set("is_clr4", DynValue.NewBoolean(PlatformAutoDetector.IsRunningOnClr4));
 			m.Set("banner", DynValue.NewString(Script.GetBanner()));
 

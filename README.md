@@ -4,16 +4,14 @@ http://www.moonsharp.org
 
 
 
-A complete Lua solution written entirely in C# for the .NET, Mono, Xamarin and Unity3D platforms.
+A complete Lua solution written entirely in C# for the .NET platform.
 
 Features:
 * 99% compatible with Lua 5.2 (with the only unsupported feature being weak tables support)
 * Support for metalua style anonymous functions (lambda-style)
 * Easy to use API
 * **Debugger** support via Debug Adapter Protocol e.g. Visual Studio Code
-* Runs on .NET 4.5, .NET Platform (formerly Core), Mono, Xamarin and Unity
-* Runs on Ahead-of-time platforms like iOS
-* Runs on IL2CPP converted code
+* Runs on .NET 8
 * No external dependencies, implemented in as few targets as possible
 * Easy and performant interop with CLR objects, with runtime code generation where supported
 * Interop with methods, extension methods, overloads, fields, properties and indexers supported
@@ -30,36 +28,6 @@ Features:
 For highlights on differences between MoonSharp and standard Lua, see http://www.moonsharp.org/moonluadifferences.html
 
 Please see http://www.moonsharp.org for downloads, infos, tutorials, etc.
-
-## Unity Package (UPM)
-
-### Build package locally
-
-```bash
-tools/upm/stage-local-package.sh 3.0.0-local
-cd .upm-staging/org.moonsharp.moonsharp
-npm pack
-```
-
-This produces a tarball like:
-
-`org.moonsharp.moonsharp-3.0.0-local.tgz`
-
-### Install in Unity
-
-Install from version branch:
-
-1. In your Unity project's `Packages/manifest.json`, add:
-   `"org.moonsharp.moonsharp": "https://github.com/moonsharp-devs/moonsharp.git?path=/interpreter#upm/v3.0"`
-2. If you just want to pin to a major version (3 instead 3.0), use branches like:
-   `upm/v3`
-3. The VSCode debugger is a separate package and can be added with:
-   `"org.moonsharp.debugger.vscode": "https://github.com/moonsharp-devs/moonsharp.git?path=/debugger/vscode#upm/v3.0"`
-
-<blockquote>
-<p>[!NOTE]
-Beta branches are available with names like `upm/beta/v3.0`
-</p></blockquote>
 
 **License**
 

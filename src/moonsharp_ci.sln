@@ -8,8 +8,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{CE0C6D33-A
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTestRunner", "TestRunners\ConsoleTestRunner\ConsoleTestRunner.csproj", "{470C034F-1F1F-499C-9499-DC00B9EEEDE9}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoonSharp.Interpreter", "MoonSharp.Interpreter\MoonSharp.Interpreter.csproj", "{E3D8B23B-BD17-4212-80DF-D871A40A160F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoonSharp.Interpreter.Tests", "MoonSharp.Interpreter.Tests\MoonSharp.Interpreter.Tests.csproj", "{25BD8EE2-2439-4777-A483-BDA8A81AEC4F}"
@@ -28,14 +26,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{470C034F-1F1F-499C-9499-DC00B9EEEDE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{470C034F-1F1F-499C-9499-DC00B9EEEDE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{470C034F-1F1F-499C-9499-DC00B9EEEDE9}.Debug|x86.ActiveCfg = Debug|x86
-		{470C034F-1F1F-499C-9499-DC00B9EEEDE9}.Debug|x86.Build.0 = Debug|x86
-		{470C034F-1F1F-499C-9499-DC00B9EEEDE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{470C034F-1F1F-499C-9499-DC00B9EEEDE9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{470C034F-1F1F-499C-9499-DC00B9EEEDE9}.Release|x86.ActiveCfg = Release|x86
-		{470C034F-1F1F-499C-9499-DC00B9EEEDE9}.Release|x86.Build.0 = Release|x86
 		{E3D8B23B-BD17-4212-80DF-D871A40A160F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E3D8B23B-BD17-4212-80DF-D871A40A160F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3D8B23B-BD17-4212-80DF-D871A40A160F}.Debug|x86.ActiveCfg = Debug|Any CPU

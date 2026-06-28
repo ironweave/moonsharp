@@ -547,7 +547,7 @@ namespace MoonSharp.Interpreter
 		}
 
 		/// <summary>
-		/// Creates a new coroutine, recycling buffers from a dead coroutine to skip slower buffer creation in Mono.
+		/// Creates a new coroutine, recycling buffers from a dead coroutine to skip slower buffer creation.
 		/// </summary>
 		/// <param name="coroutine">The <see cref="Coroutine"/> to recycle. This coroutine's state must be <see cref="CoroutineState.Dead"/></param>
 		/// <param name="function">The function</param>
