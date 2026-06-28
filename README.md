@@ -34,6 +34,13 @@ Parts of the string library are based on the KopiLua project (https://github.com
 Debugger icons are from the Eclipse project (https://www.eclipse.org/).
 
 
+**Credits**
+
+This project is a fork of [MoonSharp](http://www.moonsharp.org), the original Lua
+interpreter for .NET created by Marco Mastropaolo. See http://www.moonsharp.org for
+the original project, its documentation and tutorials.
+
+
 **Usage**
 
 Use of the library is easy as:
