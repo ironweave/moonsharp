@@ -1,4 +1,4 @@
-MoonSharp [http://www.moonsharp.org]
+MoonSharp
 ------------------------------------
 
 This archive contains all the files required to setup MoonSharp on your machine.
