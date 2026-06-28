@@ -157,6 +157,9 @@
         <None Include="TestMore\314-regex.t">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Include="TestMore\315-bigint.t">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <None Include="TestMore\320-stdin.t">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
