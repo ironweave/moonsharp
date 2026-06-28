@@ -293,6 +293,18 @@ namespace MoonSharp.Interpreter.Tests
 			TapRunner.Run(@"TestMore/315-bigint.t");
 		}
 
+		[Test]
+		public void TestMore_316_int64()
+		{
+			TapRunner.Run(@"TestMore/316-int64.t");
+		}
+
+		[Test]
+		public void TestMore_317_uint64()
+		{
+			TapRunner.Run(@"TestMore/317-uint64.t");
+		}
+
 		//[Test]
 		//[Ignore]
 		//public void TestMore_320_stdin()

@@ -160,6 +160,12 @@
         <None Include="TestMore\315-bigint.t">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Include="TestMore\316-int64.t">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Include="TestMore\317-uint64.t">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <None Include="TestMore\320-stdin.t">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>

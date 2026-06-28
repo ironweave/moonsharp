@@ -41,6 +41,8 @@ namespace MoonSharp.Interpreter
 			if (modules.Has(CoreModules.Debug)) RegisterModuleType<DebugModule>(table);
 			if (modules.Has(CoreModules.Json)) RegisterModuleType<JsonModule>(table);
 			if (modules.Has(CoreModules.BigInt)) RegisterModuleType<BigIntModule>(table);
+			if (modules.Has(CoreModules.Int64)) RegisterModuleType<Int64Module>(table);
+			if (modules.Has(CoreModules.UInt64)) RegisterModuleType<UInt64Module>(table);
 
 			return table;
 		}
