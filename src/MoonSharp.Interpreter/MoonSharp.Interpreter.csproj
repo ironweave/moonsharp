@@ -9,6 +9,7 @@
         <PackageProjectUrl>https://github.com/ironweave/moonsharp</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/ironweave/moonsharp/master/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/ironweave/moonsharp/</RepositoryUrl>
+        <PackageId>IronWeave.MoonSharp.Interpreter</PackageId>
         <Title>MoonSharp.Interpreter</Title>
         <SignAssembly>true</SignAssembly>
         <PackageVersion>2.0.0</PackageVersion>

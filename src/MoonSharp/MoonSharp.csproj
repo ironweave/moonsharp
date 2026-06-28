@@ -9,7 +9,7 @@
         <PackageProjectUrl>https://github.com/ironweave/moonsharp</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/ironweave/moonsharp/master/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/ironweave/moonsharp/</RepositoryUrl>
-        <PackageId>MoonSharp</PackageId>
+        <PackageId>IronWeave.MoonSharp</PackageId>
         <Title>MoonSharp</Title>
         <SignAssembly>true</SignAssembly>
         <PackageVersion>2.0.0</PackageVersion>
