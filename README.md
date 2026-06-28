@@ -1,6 +1,5 @@
 MoonSharp       [![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml) [![Build Status](https://img.shields.io/nuget/v/MoonSharp.svg)](https://www.nuget.org/packages/MoonSharp/)
 =========
-http://www.moonsharp.org   
 
 
 
@@ -11,7 +10,7 @@ Features:
 * Support for metalua style anonymous functions (lambda-style)
 * Easy to use API
 * **Debugger** support via Debug Adapter Protocol e.g. Visual Studio Code
-* Runs on .NET 8
+* Runs on .NET 10
 * No external dependencies, implemented in as few targets as possible
 * Easy and performant interop with CLR objects, with runtime code generation where supported
 * Interop with methods, extension methods, overloads, fields, properties and indexers supported
@@ -23,11 +22,9 @@ Features:
 * Easy to use error handling (script errors are exceptions)
 * Support for coroutines, including invocation of coroutines as C# iterators 
 * REPL interpreter, plus facilities to easily implement your own REPL in few lines of code
-* Complete XML help, and walkthroughs on http://www.moonsharp.org
+* Complete XML help
 
-For highlights on differences between MoonSharp and standard Lua, see http://www.moonsharp.org/moonluadifferences.html
 
-Please see http://www.moonsharp.org for downloads, infos, tutorials, etc.
 
 **License**
 
@@ -61,4 +58,3 @@ double MoonSharpFactorial()
 }
 ```
 
-For more in-depth tutorials, samples, etc. please refer to http://www.moonsharp.org/getting_started.html

@@ -776,7 +776,6 @@ namespace MoonSharp.Interpreter
 			StringBuilder sb = new StringBuilder();
 			sb.AppendLine(string.Format("MoonSharp {0}{1} [{2}]", subproduct, Script.VERSION, Script.GlobalOptions.Platform.GetPlatformName()));
 			sb.AppendLine("Copyright (C) 2014-2016 Marco Mastropaolo");
-			sb.AppendLine("http://www.moonsharp.org");
 			return sb.ToString();
 		}
 
