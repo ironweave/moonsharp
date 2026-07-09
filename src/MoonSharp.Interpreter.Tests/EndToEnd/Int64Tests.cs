@@ -30,11 +30,15 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 		}
 
 		[Test]
-		public void Int64_WrapsAround()
+		public void Int64_TrapsOnOverflow()
 		{
-			// int64.max + 1 wraps to int64.min
-			Assert.AreEqual("-9223372036854775808",
-				Str("return tostring(int64('9223372036854775807') + 1)"));
+			// Checked arithmetic: overflow raises instead of silently wrapping.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64('9223372036854775807') + 1"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64('-9223372036854775808') - 1"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64('9223372036854775807') * 2"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64(1) / int64(0)"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return -int64('-9223372036854775808')"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64.abs(int64('-9223372036854775808'))"));
 		}
 
 		[Test]

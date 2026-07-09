@@ -14,7 +14,7 @@
 =head2 Description
 
 Tests the MoonSharp 'int64' fixed-width signed 64-bit integer library, including
-wraparound semantics and interoperability with the standard Lua numeric type.
+checked (trapping) arithmetic and interoperability with the standard Lua numeric type.
 
 =cut
 
@@ -22,7 +22,7 @@ wraparound semantics and interoperability with the standard Lua numeric type.
 
 require 'Test.More'
 
-plan(32)
+plan(37)
 
 -- construction & tostring
 is(tostring(int64(42)), '42', "construct from integer")
@@ -40,8 +40,13 @@ is(tostring(int64(7) / int64(2)), '3', "int64 / int64 (integer division)")
 is(tostring(int64(7) % int64(2)), '1', "int64 % int64")
 is(tostring(-int64(5)), '-5', "unary minus")
 
--- fixed-width wraparound
-is(tostring(int64('9223372036854775807') + 1), '-9223372036854775808', "max + 1 wraps to min")
+-- checked arithmetic: overflow traps instead of wrapping
+error_like(function () return int64('9223372036854775807') + 1 end, "overflow", "max + 1 traps (no wrap to min)")
+error_like(function () return int64('-9223372036854775808') - 1 end, "overflow", "min - 1 traps")
+error_like(function () return int64('9223372036854775807') * 2 end, "overflow", "max * 2 traps")
+error_like(function () return int64(1) / int64(0) end, "division by zero", "division by zero traps")
+error_like(function () return -int64('-9223372036854775808') end, "overflow", "unary minus on min traps")
+error_like(function () return int64.abs(int64('-9223372036854775808')) end, "overflow", "abs(min) traps")
 
 -- interoperability with the standard Lua number type
 is(tostring(int64(10) + 5), '15', "int64 + number")

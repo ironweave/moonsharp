@@ -14,7 +14,7 @@
 =head2 Description
 
 Tests the MoonSharp 'uint64' fixed-width unsigned 64-bit integer library, including
-wraparound semantics and interoperability with the standard Lua numeric type.
+checked (trapping) arithmetic and interoperability with the standard Lua numeric type.
 
 =cut
 
@@ -22,7 +22,7 @@ wraparound semantics and interoperability with the standard Lua numeric type.
 
 require 'Test.More'
 
-plan(27)
+plan(31)
 
 -- construction & tostring
 is(tostring(uint64(42)), '42', "construct from integer")
@@ -37,9 +37,13 @@ is(tostring(uint64(6) * uint64(7)), '42', "uint64 * uint64")
 is(tostring(uint64(7) / uint64(2)), '3', "uint64 / uint64 (integer division)")
 is(tostring(uint64(7) % uint64(2)), '1', "uint64 % uint64")
 
--- fixed-width wraparound
-is(tostring(uint64(0) - 1), '18446744073709551615', "0 - 1 wraps to max")
-is(tostring(uint64('18446744073709551615') + 1), '0', "max + 1 wraps to 0")
+-- checked arithmetic: overflow/underflow traps instead of wrapping
+error_like(function () return uint64(0) - 1 end, "underflow", "0 - 1 traps (no wrap to max)")
+error_like(function () return uint64('18446744073709551615') + 1 end, "overflow", "max + 1 traps (no wrap to 0)")
+error_like(function () return uint64('18446744073709551615') * 2 end, "overflow", "max * 2 traps")
+error_like(function () return uint64(1) / uint64(0) end, "division by zero", "division by zero traps")
+error_like(function () return uint64(10) + (-5) end, "negative operand", "negative Lua operand traps")
+error_like(function () return -uint64(1) end, "underflow", "unary minus on nonzero traps")
 
 -- interoperability with the standard Lua number type
 is(tostring(uint64(10) + 5), '15', "uint64 + number")

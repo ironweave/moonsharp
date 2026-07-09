@@ -10,7 +10,7 @@ namespace MoonSharp.Interpreter.CoreLib
 	///
 	/// The module table is callable, so <c>uint64(x)</c> is a shortcut for <c>uint64.new(x)</c>.
 	/// Values are <see cref="LuaUInt64"/> userdata supporting the usual arithmetic and comparison
-	/// operators with wraparound (unchecked) semantics, like .NET <c>ulong</c>.
+	/// operators with checked (trapping) semantics: overflow, underflow, and division by zero raise a script error.
 	/// </summary>
 	[MoonSharpModule(Namespace = "uint64")]
 	public class UInt64Module

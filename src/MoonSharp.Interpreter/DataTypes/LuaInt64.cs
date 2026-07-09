@@ -5,8 +5,10 @@ namespace MoonSharp.Interpreter
 {
 	/// <summary>
 	/// A fixed-width signed 64-bit integer exposed to scripts as the 'int64' userdata type.
-	/// Backed by <see cref="System.Int64"/>. Arithmetic wraps around (unchecked), matching the
-	/// default behaviour of .NET <c>long</c> operators.
+	/// Backed by <see cref="System.Int64"/>. Arithmetic is CHECKED: overflow, underflow, and
+	/// division by zero raise a <see cref="ScriptRuntimeException"/> instead of silently
+	/// wrapping. (Deterministic-trap semantics for consensus code, where a silent wrap is an
+	/// exploit primitive, never a feature.)
 	///
 	/// Operators are provided both between two int64 values and between an int64 and a Lua
 	/// integer, so expressions such as <c>int64(10) + 5</c> work directly from script.
@@ -36,38 +38,82 @@ namespace MoonSharp.Interpreter
 			return new LuaInt64(long.Parse(s, NumberStyles.Integer, CultureInfo.InvariantCulture));
 		}
 
-		#region Arithmetic operators (wrapping)
+		#region Arithmetic operators (checked/trapping)
 
-		public static LuaInt64 operator +(LuaInt64 a, LuaInt64 b) { return new LuaInt64(unchecked(a.Value + b.Value)); }
-		public static LuaInt64 operator +(LuaInt64 a, long b) { return new LuaInt64(unchecked(a.Value + b)); }
-		public static LuaInt64 operator +(long a, LuaInt64 b) { return new LuaInt64(unchecked(a + b.Value)); }
+		private static LuaInt64 Add(long a, long b)
+		{
+			try { return new LuaInt64(checked(a + b)); }
+			catch (OverflowException) { throw new ScriptRuntimeException("int64 overflow in '+' ({0} + {1})", a, b); }
+		}
 
-		public static LuaInt64 operator -(LuaInt64 a, LuaInt64 b) { return new LuaInt64(unchecked(a.Value - b.Value)); }
-		public static LuaInt64 operator -(LuaInt64 a, long b) { return new LuaInt64(unchecked(a.Value - b)); }
-		public static LuaInt64 operator -(long a, LuaInt64 b) { return new LuaInt64(unchecked(a - b.Value)); }
+		private static LuaInt64 Sub(long a, long b)
+		{
+			try { return new LuaInt64(checked(a - b)); }
+			catch (OverflowException) { throw new ScriptRuntimeException("int64 overflow in '-' ({0} - {1})", a, b); }
+		}
 
-		public static LuaInt64 operator *(LuaInt64 a, LuaInt64 b) { return new LuaInt64(unchecked(a.Value * b.Value)); }
-		public static LuaInt64 operator *(LuaInt64 a, long b) { return new LuaInt64(unchecked(a.Value * b)); }
-		public static LuaInt64 operator *(long a, LuaInt64 b) { return new LuaInt64(unchecked(a * b.Value)); }
+		private static LuaInt64 Mul(long a, long b)
+		{
+			try { return new LuaInt64(checked(a * b)); }
+			catch (OverflowException) { throw new ScriptRuntimeException("int64 overflow in '*' ({0} * {1})", a, b); }
+		}
 
-		public static LuaInt64 operator /(LuaInt64 a, LuaInt64 b) { return new LuaInt64(a.Value / b.Value); }
-		public static LuaInt64 operator /(LuaInt64 a, long b) { return new LuaInt64(a.Value / b); }
-		public static LuaInt64 operator /(long a, LuaInt64 b) { return new LuaInt64(a / b.Value); }
+		private static LuaInt64 Div(long a, long b)
+		{
+			if (b == 0)
+				throw new ScriptRuntimeException("int64 division by zero");
+			if (a == long.MinValue && b == -1)
+				throw new ScriptRuntimeException("int64 overflow in '/' ({0} / {1})", a, b);
+			return new LuaInt64(a / b);
+		}
 
-		public static LuaInt64 operator %(LuaInt64 a, LuaInt64 b) { return new LuaInt64(a.Value % b.Value); }
-		public static LuaInt64 operator %(LuaInt64 a, long b) { return new LuaInt64(a.Value % b); }
-		public static LuaInt64 operator %(long a, LuaInt64 b) { return new LuaInt64(a % b.Value); }
+		private static LuaInt64 Mod(long a, long b)
+		{
+			if (b == 0)
+				throw new ScriptRuntimeException("int64 modulo by zero");
+			if (a == long.MinValue && b == -1)
+				return new LuaInt64(0);
+			return new LuaInt64(a % b);
+		}
 
-		public static LuaInt64 operator -(LuaInt64 a) { return new LuaInt64(unchecked(-a.Value)); }
+		public static LuaInt64 operator +(LuaInt64 a, LuaInt64 b) { return Add(a.Value, b.Value); }
+		public static LuaInt64 operator +(LuaInt64 a, long b) { return Add(a.Value, b); }
+		public static LuaInt64 operator +(long a, LuaInt64 b) { return Add(a, b.Value); }
+
+		public static LuaInt64 operator -(LuaInt64 a, LuaInt64 b) { return Sub(a.Value, b.Value); }
+		public static LuaInt64 operator -(LuaInt64 a, long b) { return Sub(a.Value, b); }
+		public static LuaInt64 operator -(long a, LuaInt64 b) { return Sub(a, b.Value); }
+
+		public static LuaInt64 operator *(LuaInt64 a, LuaInt64 b) { return Mul(a.Value, b.Value); }
+		public static LuaInt64 operator *(LuaInt64 a, long b) { return Mul(a.Value, b); }
+		public static LuaInt64 operator *(long a, LuaInt64 b) { return Mul(a, b.Value); }
+
+		public static LuaInt64 operator /(LuaInt64 a, LuaInt64 b) { return Div(a.Value, b.Value); }
+		public static LuaInt64 operator /(LuaInt64 a, long b) { return Div(a.Value, b); }
+		public static LuaInt64 operator /(long a, LuaInt64 b) { return Div(a, b.Value); }
+
+		public static LuaInt64 operator %(LuaInt64 a, LuaInt64 b) { return Mod(a.Value, b.Value); }
+		public static LuaInt64 operator %(LuaInt64 a, long b) { return Mod(a.Value, b); }
+		public static LuaInt64 operator %(long a, LuaInt64 b) { return Mod(a, b.Value); }
+
+		public static LuaInt64 operator -(LuaInt64 a)
+		{
+			if (a.Value == long.MinValue)
+				throw new ScriptRuntimeException("int64 overflow in unary '-' ({0})", a.Value);
+			return new LuaInt64(-a.Value);
+		}
 
 		#endregion
 
 		/// <summary>
-		/// Returns the absolute value (wraps for <c>int64.min</c>).
+		/// Returns the absolute value; traps for <c>int64.min</c> (whose absolute value is
+		/// not representable).
 		/// </summary>
 		public LuaInt64 Abs()
 		{
-			return new LuaInt64(unchecked(Value < 0 ? -Value : Value));
+			if (Value == long.MinValue)
+				throw new ScriptRuntimeException("int64 overflow in 'abs' ({0})", Value);
+			return new LuaInt64(Value < 0 ? -Value : Value);
 		}
 
 		/// <summary>

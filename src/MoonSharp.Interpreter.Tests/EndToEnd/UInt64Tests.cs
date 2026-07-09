@@ -27,12 +27,15 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 		}
 
 		[Test]
-		public void UInt64_WrapsAround()
+		public void UInt64_TrapsOnOverflow()
 		{
-			// 0 - 1 wraps to uint64.max
-			Assert.AreEqual("18446744073709551615", Str("return tostring(uint64(0) - 1)"));
-			// uint64.max + 1 wraps to 0
-			Assert.AreEqual("0", Str("return tostring(uint64('18446744073709551615') + 1)"));
+			// Checked arithmetic: overflow/underflow raises instead of silently wrapping.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64(0) - 1"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64('18446744073709551615') + 1"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64('18446744073709551615') * 2"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64(1) / uint64(0)"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64(10) + (-5)"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return -uint64(1)"));
 		}
 
 		[Test]

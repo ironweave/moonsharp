@@ -5,12 +5,15 @@ namespace MoonSharp.Interpreter
 {
 	/// <summary>
 	/// A fixed-width unsigned 64-bit integer exposed to scripts as the 'uint64' userdata type.
-	/// Backed by <see cref="System.UInt64"/>. Arithmetic wraps around (unchecked), matching the
-	/// default behaviour of .NET <c>ulong</c> operators.
+	/// Backed by <see cref="System.UInt64"/>. Arithmetic is CHECKED: overflow, underflow,
+	/// division by zero, and negative Lua-number operands raise a
+	/// <see cref="ScriptRuntimeException"/> instead of silently wrapping. (Deterministic-trap
+	/// semantics: these values carry token amounts in consensus code, where a silent wrap is
+	/// an exploit primitive, never a feature.)
 	///
 	/// Operators are provided both between two uint64 values and between a uint64 and a Lua
-	/// integer (which is reinterpreted as unsigned), so expressions such as <c>uint64(10) + 5</c>
-	/// work directly from script. Comparison and equality metamethods are dispatched through
+	/// integer, so expressions such as <c>uint64(10) + 5</c> work directly from script.
+	/// Comparison and equality metamethods are dispatched through
 	/// <see cref="IComparable"/> and <see cref="object.Equals(object)"/>.
 	/// </summary>
 	public struct LuaUInt64 : IEquatable<LuaUInt64>, IComparable<LuaUInt64>, IComparable
@@ -36,30 +39,83 @@ namespace MoonSharp.Interpreter
 			return new LuaUInt64(ulong.Parse(s, NumberStyles.Integer, CultureInfo.InvariantCulture));
 		}
 
-		#region Arithmetic operators (wrapping)
+		#region Arithmetic operators (checked/trapping)
 
-		public static LuaUInt64 operator +(LuaUInt64 a, LuaUInt64 b) { return new LuaUInt64(unchecked(a.Value + b.Value)); }
-		public static LuaUInt64 operator +(LuaUInt64 a, long b) { return new LuaUInt64(unchecked(a.Value + (ulong)b)); }
-		public static LuaUInt64 operator +(long a, LuaUInt64 b) { return new LuaUInt64(unchecked((ulong)a + b.Value)); }
+		/// <summary>
+		/// Converts a Lua-number operand to unsigned, trapping on negative values instead of
+		/// reinterpreting the bit pattern.
+		/// </summary>
+		private static ulong Operand(long b, string op)
+		{
+			if (b < 0)
+				throw new ScriptRuntimeException("uint64 arithmetic error in '{0}': negative operand ({1})", op, b);
+			return (ulong)b;
+		}
 
-		public static LuaUInt64 operator -(LuaUInt64 a, LuaUInt64 b) { return new LuaUInt64(unchecked(a.Value - b.Value)); }
-		public static LuaUInt64 operator -(LuaUInt64 a, long b) { return new LuaUInt64(unchecked(a.Value - (ulong)b)); }
-		public static LuaUInt64 operator -(long a, LuaUInt64 b) { return new LuaUInt64(unchecked((ulong)a - b.Value)); }
+		private static LuaUInt64 Add(ulong a, ulong b)
+		{
+			ulong r = unchecked(a + b);
+			if (r < a)
+				throw new ScriptRuntimeException("uint64 overflow in '+' ({0} + {1})", a, b);
+			return new LuaUInt64(r);
+		}
 
-		public static LuaUInt64 operator *(LuaUInt64 a, LuaUInt64 b) { return new LuaUInt64(unchecked(a.Value * b.Value)); }
-		public static LuaUInt64 operator *(LuaUInt64 a, long b) { return new LuaUInt64(unchecked(a.Value * (ulong)b)); }
-		public static LuaUInt64 operator *(long a, LuaUInt64 b) { return new LuaUInt64(unchecked((ulong)a * b.Value)); }
+		private static LuaUInt64 Sub(ulong a, ulong b)
+		{
+			if (b > a)
+				throw new ScriptRuntimeException("uint64 underflow in '-' ({0} - {1})", a, b);
+			return new LuaUInt64(a - b);
+		}
 
-		public static LuaUInt64 operator /(LuaUInt64 a, LuaUInt64 b) { return new LuaUInt64(a.Value / b.Value); }
-		public static LuaUInt64 operator /(LuaUInt64 a, long b) { return new LuaUInt64(a.Value / (ulong)b); }
-		public static LuaUInt64 operator /(long a, LuaUInt64 b) { return new LuaUInt64((ulong)a / b.Value); }
+		private static LuaUInt64 Mul(ulong a, ulong b)
+		{
+			ulong r = unchecked(a * b);
+			if (a != 0 && r / a != b)
+				throw new ScriptRuntimeException("uint64 overflow in '*' ({0} * {1})", a, b);
+			return new LuaUInt64(r);
+		}
 
-		public static LuaUInt64 operator %(LuaUInt64 a, LuaUInt64 b) { return new LuaUInt64(a.Value % b.Value); }
-		public static LuaUInt64 operator %(LuaUInt64 a, long b) { return new LuaUInt64(a.Value % (ulong)b); }
-		public static LuaUInt64 operator %(long a, LuaUInt64 b) { return new LuaUInt64((ulong)a % b.Value); }
+		private static LuaUInt64 Div(ulong a, ulong b)
+		{
+			if (b == 0)
+				throw new ScriptRuntimeException("uint64 division by zero");
+			return new LuaUInt64(a / b);
+		}
 
-		// Two's-complement negation (wraps), since ulong has no native unary minus.
-		public static LuaUInt64 operator -(LuaUInt64 a) { return new LuaUInt64(unchecked(0UL - a.Value)); }
+		private static LuaUInt64 Mod(ulong a, ulong b)
+		{
+			if (b == 0)
+				throw new ScriptRuntimeException("uint64 modulo by zero");
+			return new LuaUInt64(a % b);
+		}
+
+		public static LuaUInt64 operator +(LuaUInt64 a, LuaUInt64 b) { return Add(a.Value, b.Value); }
+		public static LuaUInt64 operator +(LuaUInt64 a, long b) { return Add(a.Value, Operand(b, "+")); }
+		public static LuaUInt64 operator +(long a, LuaUInt64 b) { return Add(Operand(a, "+"), b.Value); }
+
+		public static LuaUInt64 operator -(LuaUInt64 a, LuaUInt64 b) { return Sub(a.Value, b.Value); }
+		public static LuaUInt64 operator -(LuaUInt64 a, long b) { return Sub(a.Value, Operand(b, "-")); }
+		public static LuaUInt64 operator -(long a, LuaUInt64 b) { return Sub(Operand(a, "-"), b.Value); }
+
+		public static LuaUInt64 operator *(LuaUInt64 a, LuaUInt64 b) { return Mul(a.Value, b.Value); }
+		public static LuaUInt64 operator *(LuaUInt64 a, long b) { return Mul(a.Value, Operand(b, "*")); }
+		public static LuaUInt64 operator *(long a, LuaUInt64 b) { return Mul(Operand(a, "*"), b.Value); }
+
+		public static LuaUInt64 operator /(LuaUInt64 a, LuaUInt64 b) { return Div(a.Value, b.Value); }
+		public static LuaUInt64 operator /(LuaUInt64 a, long b) { return Div(a.Value, Operand(b, "/")); }
+		public static LuaUInt64 operator /(long a, LuaUInt64 b) { return Div(Operand(a, "/"), b.Value); }
+
+		public static LuaUInt64 operator %(LuaUInt64 a, LuaUInt64 b) { return Mod(a.Value, b.Value); }
+		public static LuaUInt64 operator %(LuaUInt64 a, long b) { return Mod(a.Value, Operand(b, "%")); }
+		public static LuaUInt64 operator %(long a, LuaUInt64 b) { return Mod(Operand(a, "%"), b.Value); }
+
+		// Unary minus on an unsigned value is meaningful only for zero; anything else traps.
+		public static LuaUInt64 operator -(LuaUInt64 a)
+		{
+			if (a.Value != 0)
+				throw new ScriptRuntimeException("uint64 underflow in unary '-' ({0})", a.Value);
+			return new LuaUInt64(0);
+		}
 
 		#endregion
 

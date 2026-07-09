@@ -10,7 +10,7 @@ namespace MoonSharp.Interpreter.CoreLib
 	///
 	/// The module table is callable, so <c>int64(x)</c> is a shortcut for <c>int64.new(x)</c>.
 	/// Values are <see cref="LuaInt64"/> userdata supporting the usual arithmetic and comparison
-	/// operators with wraparound (unchecked) semantics, like .NET <c>long</c>.
+	/// operators with checked (trapping) semantics: overflow and division by zero raise a script error.
 	/// </summary>
 	[MoonSharpModule(Namespace = "int64")]
 	public class Int64Module
