@@ -60,6 +60,11 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.IsFalse(Bool("return int64(5) == int64(6)"));
 			Assert.IsTrue(Bool("return int64(5) < 10"));
 			Assert.IsTrue(Bool("return int64(-3) < 0"));
+			// Mixed equality with a plain Lua number (both operand orders).
+			Assert.IsTrue(Bool("return int64(5) == 5"));
+			Assert.IsTrue(Bool("return 5 == int64(5)"));
+			Assert.IsFalse(Bool("return int64(5) == 6"));
+			Assert.IsTrue(Bool("return int64(5) ~= 6"));
 		}
 
 		[Test]

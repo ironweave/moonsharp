@@ -84,6 +84,11 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.IsTrue(Bool("return decimal('5.5') == decimal('5.5')"));
 			Assert.IsFalse(Bool("return decimal('5.5') == decimal('6.5')"));
 			Assert.IsTrue(Bool("return decimal('5') < 10"));
+			// Mixed equality with a plain Lua number (both operand orders).
+			Assert.IsTrue(Bool("return decimal('5') == 5"));
+			Assert.IsTrue(Bool("return 5 == decimal('5')"));
+			Assert.IsFalse(Bool("return decimal('5.5') == 5"));
+			Assert.IsTrue(Bool("return decimal('5.5') ~= 5"));
 		}
 
 		[Test]

@@ -86,6 +86,11 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.IsTrue(Bool("return bigint(5) == bigint(5)"));
 			Assert.IsFalse(Bool("return bigint(5) == bigint(6)"));
 			Assert.IsTrue(Bool("return bigint(5) < 10"));
+			// Mixed equality with a plain Lua number (both operand orders).
+			Assert.IsTrue(Bool("return bigint(5) == 5"));
+			Assert.IsTrue(Bool("return 5 == bigint(5)"));
+			Assert.IsFalse(Bool("return bigint(5) == 6"));
+			Assert.IsTrue(Bool("return bigint(5) ~= 6"));
 		}
 
 		[Test]
@@ -93,6 +98,17 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 		{
 			Assert.AreEqual("17", Str("return tostring(bigint.abs(bigint(-17)))"));
 			Assert.AreEqual("1024", Str("return tostring(bigint.pow(bigint(2), 10))"));
+			// Negative / oversized exponents are rejected, not silently mis-cast.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return bigint.pow(bigint(2), -1)"));
+		}
+
+		[Test]
+		public void BigInt_DivideByZeroTraps()
+		{
+			// Arbitrary-precision so it cannot overflow, but /0 and %0 must trap rather
+			// than escaping as a raw CLR DivideByZeroException.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return bigint(1) / bigint(0)"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return bigint(1) % bigint(0)"));
 		}
 
 		[Test]

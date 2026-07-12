@@ -57,6 +57,11 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.IsTrue(Bool("return uint64(0) > -1"));
 			// huge value exceeding the exact range of a double still compares correctly
 			Assert.IsTrue(Bool("return uint64('18446744073709551615') > uint64('18446744073709551614')"));
+			// Mixed equality with a plain Lua number (both operand orders).
+			Assert.IsTrue(Bool("return uint64(5) == 5"));
+			Assert.IsTrue(Bool("return 5 == uint64(5)"));
+			Assert.IsFalse(Bool("return uint64(5) == 6"));
+			Assert.IsTrue(Bool("return uint64(5) ~= 6"));
 		}
 
 		[Test]

@@ -203,7 +203,9 @@ namespace MoonSharp.Interpreter
 
 		public override bool Equals(object obj)
 		{
-			return obj is DecimalType && Value == ((DecimalType)obj).Value;
+			if (obj is DecimalType) return Value == ((DecimalType)obj).Value;
+			// Value-equal to any other numeric type (decimal(5) == 5 == int64(5) == uint64(5)).
+			return NumericInterop.AreEqual(Value, obj);
 		}
 
 		public bool Equals(DecimalType other)
@@ -218,25 +220,16 @@ namespace MoonSharp.Interpreter
 
 		/// <summary>
 		/// Non-generic comparison, used by the runtime to dispatch comparison metamethods.
-		/// Supports comparison against another DecimalType or a Lua number. Floating-point
-		/// operands are compared in double space (matching the sibling numeric types) so that
-		/// out-of-range magnitudes order correctly instead of overflowing the decimal cast.
+		/// Supports comparison against another DecimalType, any sibling numeric type, or a Lua
+		/// number. Floating-point operands are compared in double space (matching the sibling
+		/// numeric types) so out-of-range magnitudes order correctly instead of overflowing the
+		/// decimal cast.
 		/// </summary>
 		public int CompareTo(object obj)
 		{
 			if (obj is DecimalType)
 				return Value.CompareTo(((DecimalType)obj).Value);
-			if (obj is decimal)
-				return Value.CompareTo((decimal)obj);
-			if (obj is double || obj is float)
-				return ((double)Value).CompareTo(Convert.ToDouble(obj, CultureInfo.InvariantCulture));
-			if (obj is sbyte || obj is byte || obj is short || obj is ushort ||
-				obj is int || obj is uint || obj is long)
-				return Value.CompareTo((decimal)Convert.ToInt64(obj, CultureInfo.InvariantCulture));
-			if (obj is ulong)
-				return Value.CompareTo((decimal)Convert.ToUInt64(obj, CultureInfo.InvariantCulture));
-
-			throw new ArgumentException("Cannot compare a decimal with " + (obj == null ? "nil" : obj.GetType().Name));
+			return NumericInterop.Compare(Value, obj);
 		}
 
 		public override int GetHashCode()

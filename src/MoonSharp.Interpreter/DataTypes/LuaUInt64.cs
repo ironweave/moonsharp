@@ -140,7 +140,9 @@ namespace MoonSharp.Interpreter
 
 		public override bool Equals(object obj)
 		{
-			return obj is LuaUInt64 && Value == ((LuaUInt64)obj).Value;
+			if (obj is LuaUInt64) return Value == ((LuaUInt64)obj).Value;
+			// Value-equal to any other numeric type (uint64(5) == 5 == int64(5) == decimal(5)).
+			return NumericInterop.AreEqual(Value, obj);
 		}
 
 		public bool Equals(LuaUInt64 other)
@@ -155,25 +157,13 @@ namespace MoonSharp.Interpreter
 
 		/// <summary>
 		/// Non-generic comparison used by the runtime to dispatch the ordering metamethods.
-		/// Supports comparison against another uint64 or a Lua number.
+		/// Supports comparison against another uint64, any sibling numeric type, or a Lua number.
 		/// </summary>
 		public int CompareTo(object obj)
 		{
 			if (obj is LuaUInt64)
 				return Value.CompareTo(((LuaUInt64)obj).Value);
-			if (obj is double || obj is float || obj is decimal)
-				return ((double)Value).CompareTo(Convert.ToDouble(obj, CultureInfo.InvariantCulture));
-			if (obj is ulong)
-				return Value.CompareTo((ulong)obj);
-			if (obj is byte || obj is ushort || obj is uint)
-				return Value.CompareTo(Convert.ToUInt64(obj, CultureInfo.InvariantCulture));
-			if (obj is sbyte || obj is short || obj is int || obj is long)
-			{
-				long l = Convert.ToInt64(obj, CultureInfo.InvariantCulture);
-				return (l < 0) ? 1 : Value.CompareTo((ulong)l);
-			}
-
-			throw new ArgumentException("Cannot compare a uint64 with " + (obj == null ? "nil" : obj.GetType().Name));
+			return NumericInterop.Compare(Value, obj);
 		}
 
 		public override int GetHashCode()

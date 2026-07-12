@@ -105,7 +105,8 @@ namespace MoonSharp.Interpreter.CoreLib
 			BigInt b = ToBigInt(args[0], "bigint.pow");
 			DynValue e = args.AsType(1, "bigint.pow", DataType.Number, false);
 			double exp = e.Number;
-			if (exp < 0 || exp != System.Math.Floor(exp))
+			// Upper bound guards the (int) cast below; a huge exponent is also a memory bomb.
+			if (exp < 0 || exp != System.Math.Floor(exp) || exp > int.MaxValue)
 				throw new ScriptRuntimeException("bad argument #2 to 'bigint.pow' (non-negative integer exponent expected)");
 			return UserData.Create(b.Pow((int)exp));
 		}
