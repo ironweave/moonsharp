@@ -898,17 +898,23 @@ namespace MoonSharp.Interpreter.Execution.VM
 		/// IronContract numeric hygiene for the default 'number' (double) type: a finite pair
 		/// of operands must not silently yield a non-finite result. Overflow to +/-Infinity and
 		/// invalid-operation NaN (n/0, 0/0, x%0) are trapped as a script error instead of letting
-		/// a poisoned value flow into consensus logic. A pre-existing non-finite operand (e.g.
-		/// math.huge) passes through unchanged, so the constant stays usable as a sentinel.
-		/// This deliberately departs from stock Lua, which yields inf/nan.
+		/// a poisoned value flow into consensus logic. An operand that is ALREADY non-finite
+		/// (e.g. math.huge) is allowed through untrapped — only genuine finite -> non-finite
+		/// transitions trap. So math.huge stays usable as a sentinel, though operations on it can
+		/// still yield non-finite results (e.g. huge - huge => nan). This deliberately departs
+		/// from stock Lua, which yields inf/nan.
 		/// </summary>
 		private static double CheckFinite(double result, double a, double b, string op)
 		{
 			if (double.IsFinite(result) || !double.IsFinite(a) || !double.IsFinite(b))
 				return result;
+			// Format operands with the invariant culture so the error text is deterministic
+			// (no locale-dependent decimal separators) across validators.
+			string la = a.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			string lb = b.ToString(System.Globalization.CultureInfo.InvariantCulture);
 			if (double.IsNaN(result))
-				throw new ScriptRuntimeException("number arithmetic produced nan in '{0}' ({1} {0} {2})", op, a, b);
-			throw new ScriptRuntimeException("number overflow in '{0}' ({1} {0} {2})", op, a, b);
+				throw new ScriptRuntimeException("number arithmetic produced nan in '{0}' ({1} {0} {2})", op, la, lb);
+			throw new ScriptRuntimeException("number overflow in '{0}' ({1} {0} {2})", op, la, lb);
 		}
 
 		private int ExecAdd(Instruction i, int instructionPtr)

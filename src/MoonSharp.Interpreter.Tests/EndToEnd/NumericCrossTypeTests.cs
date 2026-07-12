@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace MoonSharp.Interpreter.Tests.EndToEnd
@@ -68,6 +69,32 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 				t[decimal(5)] = 'd'
 				return t[5] .. '/' .. t[uint64(5)] .. '/' .. t[int64(5)] .. '/' .. t[decimal(5)]
 			").String);
+		}
+
+		[Test]
+		public void CrossType_EqualsAndHashCodeContract()
+		{
+			// The four numeric userdata types at the same value satisfy the CLR equality
+			// contract: pairwise-equal (symmetric) and equal hash codes, so they behave as a
+			// single key in a hash-based container.
+			object[] fives =
+			{
+				new LuaInt64(5), new LuaUInt64(5), new BigInt(5), new DecimalType(5m)
+			};
+
+			for (int i = 0; i < fives.Length; i++)
+			{
+				for (int j = 0; j < fives.Length; j++)
+				{
+					Assert.IsTrue(fives[i].Equals(fives[j]), fives[i] + ".Equals(" + fives[j] + ")");
+					Assert.AreEqual(fives[i].GetHashCode(), fives[j].GetHashCode(),
+						"hash " + fives[i] + " vs " + fives[j]);
+				}
+				// Hash also matches the plain double representation these values equal.
+				Assert.AreEqual(5.0.GetHashCode(), fives[i].GetHashCode(), "hash vs double 5.0");
+			}
+
+			Assert.AreEqual(1, new HashSet<object>(fives).Count, "collapse to one hash-set entry");
 		}
 
 		[Test]

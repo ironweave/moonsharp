@@ -168,7 +168,8 @@ namespace MoonSharp.Interpreter
 
 		public override int GetHashCode()
 		{
-			return Value.GetHashCode();
+			// Value-based so it stays consistent with cross-type equality (uint64(5) == 5 == decimal(5)).
+			return NumericInterop.ValueHashCode(Value);
 		}
 	}
 }

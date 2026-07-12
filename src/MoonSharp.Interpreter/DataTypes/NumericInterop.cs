@@ -21,10 +21,13 @@ namespace MoonSharp.Interpreter
 	/// performed in double space, matching the precision trade-off already used across these
 	/// types for number operands.
 	///
-	/// Cross-type value equality does NOT imply equal CLR hash codes, but that is irrelevant
-	/// to Lua table keys: <see cref="DynValue"/> keys short-circuit on data-type and on
-	/// userdata-descriptor mismatch before ever consulting these values, so distinct numeric
-	/// types remain distinct table keys (as in stock Lua, where '__eq' never governs rawget).
+	/// Cross-type value equality is matched by a value-based <see cref="ValueHashCode"/> that
+	/// all four types delegate their GetHashCode to, so the CLR equality contract (equal
+	/// objects hash equally) holds across these types and against plain doubles. This is
+	/// independent of Lua table keys, which key on <see cref="DynValue"/>: those short-circuit
+	/// on data-type and userdata-descriptor mismatch before ever consulting these values, so
+	/// distinct numeric types remain distinct table slots (as in stock Lua, where '__eq' never
+	/// governs rawget).
 	/// </summary>
 	internal static class NumericInterop
 	{
@@ -108,6 +111,18 @@ namespace MoonSharp.Interpreter
 			}
 
 			return AsBigInteger(a) == AsBigInteger(b);
+		}
+
+		/// <summary>
+		/// Value-based hash consistent with <see cref="AreEqual"/>: whenever two operands
+		/// compare equal they hash equally, because equal real values map to the same double
+		/// (equality is either performed in double space, or is exact between values that then
+		/// convert to the same double). Unequal values may of course collide, as always. All
+		/// four numeric types delegate GetHashCode here so the CLR equality contract holds.
+		/// </summary>
+		internal static int ValueHashCode(object value)
+		{
+			return AsDouble(Unwrap(value)).GetHashCode();
 		}
 
 		/// <summary>
