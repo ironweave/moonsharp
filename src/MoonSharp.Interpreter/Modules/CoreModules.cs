@@ -93,12 +93,16 @@ namespace MoonSharp.Interpreter
 		/// The "uint64" fixed-width unsigned 64-bit integer package (introduced by MoonSharp).
 		/// </summary>
 		UInt64 = 0x80000,
+		/// <summary>
+		/// The "decimal" fixed-point decimal package for currency-safe calculations (introduced by MoonSharp).
+		/// </summary>
+		Decimal = 0x100000,
 
 
 		/// <summary>
-		/// A sort of "hard" sandbox preset, including string, math, table, bit32, bigint, int64, uint64 packages, constants and table iterators.
+		/// A sort of "hard" sandbox preset, including string, math, table, bit32, bigint, int64, uint64, decimal packages, constants and table iterators.
 		/// </summary>
-		Preset_HardSandbox = GlobalConsts | TableIterators | String | Table | Basic | Math | Bit32 | BigInt | Int64 | UInt64,
+		Preset_HardSandbox = GlobalConsts | TableIterators | String | Table | Basic | Math | Bit32 | BigInt | Int64 | UInt64 | Decimal,
 		/// <summary>
 		/// A softer sandbox preset, adding metatables support, error handling, coroutine, time functions, json parsing and dynamic evaluations.
 		/// </summary>

@@ -43,6 +43,7 @@ namespace MoonSharp.Interpreter
 			if (modules.Has(CoreModules.BigInt)) RegisterModuleType<BigIntModule>(table);
 			if (modules.Has(CoreModules.Int64)) RegisterModuleType<Int64Module>(table);
 			if (modules.Has(CoreModules.UInt64)) RegisterModuleType<UInt64Module>(table);
+			if (modules.Has(CoreModules.Decimal)) RegisterModuleType<DecimalModule>(table);
 
 			return table;
 		}
