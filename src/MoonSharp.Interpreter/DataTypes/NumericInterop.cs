@@ -6,8 +6,8 @@ namespace MoonSharp.Interpreter
 {
 	/// <summary>
 	/// Shared value-equality and ordering logic for the numeric userdata types
-	/// (<see cref="LuaInt64"/>, <see cref="LuaUInt64"/>, <see cref="BigInt"/> and
-	/// <see cref="DecimalType"/>) and plain Lua numbers.
+	/// (<see cref="LuaInt64"/>, <see cref="LuaUInt64"/>, <see cref="LuaUInt256"/>,
+	/// <see cref="BigInt"/> and <see cref="DecimalType"/>) and plain Lua numbers.
 	///
 	/// This makes the numeric types behave consistently under the '==', '&lt;', '&lt;=',
 	/// '&gt;' and '&gt;=' metamethods: two numeric values compare by mathematical value
@@ -42,6 +42,7 @@ namespace MoonSharp.Interpreter
 		{
 			if (o is LuaInt64) return ((LuaInt64)o).Value;
 			if (o is LuaUInt64) return ((LuaUInt64)o).Value;
+			if (o is LuaUInt256) return ((LuaUInt256)o).Value;
 			if (o is BigInt) return ((BigInt)o).Value;
 			if (o is DecimalType) return ((DecimalType)o).Value;
 			return o;
