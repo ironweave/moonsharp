@@ -118,8 +118,11 @@ namespace MoonSharp.Interpreter.CoreLib
 		public static DynValue round(ScriptExecutionContext executionContext, CallbackArguments args)
 		{
 			DecimalType d = ToDecimal(args[0], "decimal.round");
-			// Second argument is optional; when present it must be a number. A non-number
-			// (string, boolean, ...) is a caller error, not a silent "round to 0 places".
+			// Second argument is optional; when present it must be a number (Lua's usual
+			// numeric-string coercion applies, matching bigint.pow and the arithmetic ops, so
+			// "2" is accepted as 2). A value that is not a number and not coercible to one
+			// (boolean, non-numeric string, table, ...) is a caller error, not a silent
+			// "round to 0 places".
 			DynValue placesArg = args.AsType(1, "decimal.round", DataType.Number, true);
 			int places = 0;
 			if (placesArg.Type == DataType.Number)

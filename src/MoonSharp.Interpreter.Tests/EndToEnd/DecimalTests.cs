@@ -184,6 +184,10 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return decimal.round(decimal('3.14159'), 'xx')"));
 			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return decimal.round(decimal('3.14159'), false)"));
 			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return decimal.round(decimal('3.14159'), -1)"));
+			// A numeric string coerces to a number, as Lua does elsewhere (matches bigint.pow).
+			Assert.AreEqual("3.14", Str("return tostring(decimal.round(decimal('3.14159'), '2'))"));
+			// ...but a fractional or out-of-range coerced value is still rejected.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return decimal.round(decimal('3.14159'), '2.5')"));
 		}
 	}
 }
