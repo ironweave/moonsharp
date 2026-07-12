@@ -10,7 +10,9 @@ namespace MoonSharp.Interpreter
 	///
 	/// Instances are immutable. Arithmetic and comparison operators are provided both
 	/// between two bigints and between a bigint and a (CLR <c>long</c>) Lua integer, so
-	/// expressions such as <c>bigint(10) + 5</c> work directly from script.
+	/// expressions such as <c>bigint(10) + 5</c> work directly from script. BigInteger cannot
+	/// overflow, but division and modulo by zero trap as a <see cref="ScriptRuntimeException"/>
+	/// rather than escaping as a raw CLR exception (matching int64/uint64/decimal).
 	/// </summary>
 	public struct BigInt : IEquatable<BigInt>, IComparable<BigInt>, IComparable
 	{
@@ -28,11 +30,16 @@ namespace MoonSharp.Interpreter
 		}
 
 		/// <summary>
-		/// Parses a decimal string into a bigint.
+		/// Parses a decimal string into a bigint. Raises a script error (never a raw CLR
+		/// FormatException, which Lua's pcall cannot catch) on unparseable input — this method
+		/// is script-reachable as a static member of the registered userdata type.
 		/// </summary>
 		public static BigInt Parse(string s)
 		{
-			return new BigInt(BigInteger.Parse(s, CultureInfo.InvariantCulture));
+			BigInteger parsed;
+			if (!BigInteger.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed))
+				throw new ScriptRuntimeException("cannot parse '{0}' as a bigint", s);
+			return new BigInt(parsed);
 		}
 
 		#region Arithmetic operators
@@ -49,13 +56,30 @@ namespace MoonSharp.Interpreter
 		public static BigInt operator *(BigInt a, long b) { return new BigInt(a.Value * b); }
 		public static BigInt operator *(long a, BigInt b) { return new BigInt(a * b.Value); }
 
-		public static BigInt operator /(BigInt a, BigInt b) { return new BigInt(a.Value / b.Value); }
-		public static BigInt operator /(BigInt a, long b) { return new BigInt(a.Value / b); }
-		public static BigInt operator /(long a, BigInt b) { return new BigInt(a / b.Value); }
+		// Division and modulo trap on a zero divisor (matching int64/uint64/decimal) rather
+		// than letting a raw DivideByZeroException escape the interpreter. BigInteger cannot
+		// overflow, so these are the only trapping cases.
+		private static BigInt Div(BigInteger a, BigInteger b)
+		{
+			if (b.IsZero)
+				throw new ScriptRuntimeException("bigint division by zero");
+			return new BigInt(a / b);
+		}
 
-		public static BigInt operator %(BigInt a, BigInt b) { return new BigInt(a.Value % b.Value); }
-		public static BigInt operator %(BigInt a, long b) { return new BigInt(a.Value % b); }
-		public static BigInt operator %(long a, BigInt b) { return new BigInt(a % b.Value); }
+		private static BigInt Mod(BigInteger a, BigInteger b)
+		{
+			if (b.IsZero)
+				throw new ScriptRuntimeException("bigint modulo by zero");
+			return new BigInt(a % b);
+		}
+
+		public static BigInt operator /(BigInt a, BigInt b) { return Div(a.Value, b.Value); }
+		public static BigInt operator /(BigInt a, long b) { return Div(a.Value, b); }
+		public static BigInt operator /(long a, BigInt b) { return Div(a, b.Value); }
+
+		public static BigInt operator %(BigInt a, BigInt b) { return Mod(a.Value, b.Value); }
+		public static BigInt operator %(BigInt a, long b) { return Mod(a.Value, b); }
+		public static BigInt operator %(long a, BigInt b) { return Mod(a, b.Value); }
 
 		public static BigInt operator -(BigInt a) { return new BigInt(-a.Value); }
 
@@ -128,7 +152,9 @@ namespace MoonSharp.Interpreter
 
 		public override bool Equals(object obj)
 		{
-			return obj is BigInt && Value == ((BigInt)obj).Value;
+			if (obj is BigInt) return Value == ((BigInt)obj).Value;
+			// Value-equal to any other numeric type (bigint(5) == 5 == int64(5) == decimal(5)).
+			return NumericInterop.AreEqual(Value, obj);
 		}
 
 		public bool Equals(BigInt other)
@@ -143,28 +169,19 @@ namespace MoonSharp.Interpreter
 
 		/// <summary>
 		/// Non-generic comparison, used by the runtime to dispatch the '&lt;', '&lt;=', '&gt;' and '&gt;='
-		/// metamethods. Supports comparison against another bigint or a Lua number.
+		/// metamethods. Supports comparison against another bigint, any sibling numeric type, or a Lua number.
 		/// </summary>
 		public int CompareTo(object obj)
 		{
 			if (obj is BigInt)
 				return Value.CompareTo(((BigInt)obj).Value);
-			if (obj is BigInteger)
-				return Value.CompareTo((BigInteger)obj);
-			if (obj is double || obj is float || obj is decimal)
-				return ((double)Value).CompareTo(Convert.ToDouble(obj, CultureInfo.InvariantCulture));
-			if (obj is sbyte || obj is byte || obj is short || obj is ushort ||
-				obj is int || obj is uint || obj is long)
-				return Value.CompareTo(new BigInteger(Convert.ToInt64(obj, CultureInfo.InvariantCulture)));
-			if (obj is ulong)
-				return Value.CompareTo(new BigInteger(Convert.ToUInt64(obj, CultureInfo.InvariantCulture)));
-
-			throw new ArgumentException("Cannot compare a bigint with " + (obj == null ? "nil" : obj.GetType().Name));
+			return NumericInterop.Compare(Value, obj);
 		}
 
 		public override int GetHashCode()
 		{
-			return Value.GetHashCode();
+			// Value-based so it stays consistent with cross-type equality (bigint(5) == 5 == decimal(5)).
+			return NumericInterop.ValueHashCode(Value);
 		}
 	}
 }

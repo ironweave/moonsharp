@@ -105,7 +105,11 @@ namespace MoonSharp.Interpreter.CoreLib
 			BigInt b = ToBigInt(args[0], "bigint.pow");
 			DynValue e = args.AsType(1, "bigint.pow", DataType.Number, false);
 			double exp = e.Number;
-			if (exp < 0 || exp != System.Math.Floor(exp))
+			// Reject negative/non-integer exponents and bound to int range so the (int) cast
+			// below is well-defined. This does NOT bound compute/memory cost (int.MaxValue is
+			// still astronomical) — actual resource limiting is the host engine's step/gas
+			// metering, not this type.
+			if (exp < 0 || exp != System.Math.Floor(exp) || exp > int.MaxValue)
 				throw new ScriptRuntimeException("bad argument #2 to 'bigint.pow' (non-negative integer exponent expected)");
 			return UserData.Create(b.Pow((int)exp));
 		}

@@ -31,11 +31,16 @@ namespace MoonSharp.Interpreter
 		}
 
 		/// <summary>
-		/// Parses a decimal string into an int64.
+		/// Parses a decimal string into an int64. Raises a script error (never a raw CLR
+		/// FormatException/OverflowException, which Lua's pcall cannot catch) on unparseable
+		/// input — this method is script-reachable as a static member of the registered userdata type.
 		/// </summary>
 		public static LuaInt64 Parse(string s)
 		{
-			return new LuaInt64(long.Parse(s, NumberStyles.Integer, CultureInfo.InvariantCulture));
+			long parsed;
+			if (!long.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed))
+				throw new ScriptRuntimeException("cannot parse '{0}' as an int64", s);
+			return new LuaInt64(parsed);
 		}
 
 		#region Arithmetic operators (checked/trapping)
@@ -137,7 +142,9 @@ namespace MoonSharp.Interpreter
 
 		public override bool Equals(object obj)
 		{
-			return obj is LuaInt64 && Value == ((LuaInt64)obj).Value;
+			if (obj is LuaInt64) return Value == ((LuaInt64)obj).Value;
+			// Value-equal to any other numeric type (int64(5) == 5 == uint64(5) == decimal(5)).
+			return NumericInterop.AreEqual(Value, obj);
 		}
 
 		public bool Equals(LuaInt64 other)
@@ -152,29 +159,19 @@ namespace MoonSharp.Interpreter
 
 		/// <summary>
 		/// Non-generic comparison used by the runtime to dispatch the ordering metamethods.
-		/// Supports comparison against another int64 or a Lua number.
+		/// Supports comparison against another int64, any sibling numeric type, or a Lua number.
 		/// </summary>
 		public int CompareTo(object obj)
 		{
 			if (obj is LuaInt64)
 				return Value.CompareTo(((LuaInt64)obj).Value);
-			if (obj is double || obj is float || obj is decimal)
-				return ((double)Value).CompareTo(Convert.ToDouble(obj, CultureInfo.InvariantCulture));
-			if (obj is sbyte || obj is byte || obj is short || obj is ushort ||
-				obj is int || obj is uint || obj is long)
-				return Value.CompareTo(Convert.ToInt64(obj, CultureInfo.InvariantCulture));
-			if (obj is ulong)
-			{
-				ulong u = (ulong)obj;
-				return (Value < 0) ? -1 : ((ulong)Value).CompareTo(u);
-			}
-
-			throw new ArgumentException("Cannot compare an int64 with " + (obj == null ? "nil" : obj.GetType().Name));
+			return NumericInterop.Compare(Value, obj);
 		}
 
 		public override int GetHashCode()
 		{
-			return Value.GetHashCode();
+			// Value-based so it stays consistent with cross-type equality (int64(5) == 5 == decimal(5)).
+			return NumericInterop.ValueHashCode(Value);
 		}
 	}
 }

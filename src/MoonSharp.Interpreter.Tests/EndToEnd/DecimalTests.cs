@@ -84,6 +84,11 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.IsTrue(Bool("return decimal('5.5') == decimal('5.5')"));
 			Assert.IsFalse(Bool("return decimal('5.5') == decimal('6.5')"));
 			Assert.IsTrue(Bool("return decimal('5') < 10"));
+			// Mixed equality with a plain Lua number (both operand orders).
+			Assert.IsTrue(Bool("return decimal('5') == 5"));
+			Assert.IsTrue(Bool("return 5 == decimal('5')"));
+			Assert.IsFalse(Bool("return decimal('5.5') == 5"));
+			Assert.IsTrue(Bool("return decimal('5.5') ~= 5"));
 		}
 
 		[Test]
@@ -188,6 +193,31 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.AreEqual("3.14", Str("return tostring(decimal.round(decimal('3.14159'), '2'))"));
 			// ...but a fractional or out-of-range coerced value is still rejected.
 			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return decimal.round(decimal('3.14159'), '2.5')"));
+		}
+
+		[Test]
+		public void Decimal_StaticParseDoesNotEscapeRawClrException()
+		{
+			// decimal(x).Parse(...) is script-reachable as a static member of the registered
+			// userdata type; unparseable or out-of-range input previously escaped as a raw
+			// FormatException/OverflowException rather than a pcall-catchable script error.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return decimal(0).Parse('zz')"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return decimal(0).Parse('1e400')"));
+			Assert.IsFalse(Bool("return (pcall(function () return decimal(0).Parse('zz') end))"));
+		}
+
+		[Test]
+		public void Decimal_ComparisonWithNonNumberIsPcallCatchable()
+		{
+			// Previously escaped as a raw ArgumentException from NumericInterop.Compare.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return decimal(1) < 'abc'"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return decimal(1) < {}"));
+			Assert.IsFalse(Bool("return (pcall(function () return decimal(1) < 'abc' end))"));
+
+			// Error message reports the operand in Lua type terms, not CLR type names.
+			var ex = Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return decimal(1) < 'abc'"));
+			StringAssert.Contains("string", ex.Message);
+			StringAssert.DoesNotContain("String", ex.Message);
 		}
 	}
 }

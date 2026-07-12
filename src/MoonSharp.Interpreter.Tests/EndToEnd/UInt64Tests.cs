@@ -57,6 +57,11 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.IsTrue(Bool("return uint64(0) > -1"));
 			// huge value exceeding the exact range of a double still compares correctly
 			Assert.IsTrue(Bool("return uint64('18446744073709551615') > uint64('18446744073709551614')"));
+			// Mixed equality with a plain Lua number (both operand orders).
+			Assert.IsTrue(Bool("return uint64(5) == 5"));
+			Assert.IsTrue(Bool("return 5 == uint64(5)"));
+			Assert.IsFalse(Bool("return uint64(5) == 6"));
+			Assert.IsTrue(Bool("return uint64(5) ~= 6"));
 		}
 
 		[Test]
@@ -79,6 +84,23 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64(-1)"));
 			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64(int64(-1))"));
 			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64('nope')"));
+		}
+
+		[Test]
+		public void UInt64_NoRawClrExceptionsEscapeToScript()
+		{
+			// These previously escaped as raw FormatException/OverflowException/ArgumentException,
+			// which pcall cannot catch and which crash the embedding host.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64.max.Parse('zz')"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64.max.Parse('-1')"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64(1) < 'abc'"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64.max.CompareTo({})"));
+			Assert.IsFalse(Bool("return (pcall(function () return uint64(1) < 'abc' end))"));
+
+			// Error message reports the operand in Lua type terms, not CLR type names.
+			var ex = Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return uint64(1) < 'abc'"));
+			StringAssert.Contains("string", ex.Message);
+			StringAssert.DoesNotContain("String", ex.Message);
 		}
 	}
 }
