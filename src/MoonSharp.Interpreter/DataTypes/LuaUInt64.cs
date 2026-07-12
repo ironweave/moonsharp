@@ -32,11 +32,16 @@ namespace MoonSharp.Interpreter
 		}
 
 		/// <summary>
-		/// Parses a decimal string into a uint64.
+		/// Parses a decimal string into a uint64. Raises a script error (never a raw CLR
+		/// FormatException/OverflowException, which Lua's pcall cannot catch) on unparseable
+		/// input — this method is script-reachable as a static member of the registered userdata type.
 		/// </summary>
 		public static LuaUInt64 Parse(string s)
 		{
-			return new LuaUInt64(ulong.Parse(s, NumberStyles.Integer, CultureInfo.InvariantCulture));
+			ulong parsed;
+			if (!ulong.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed))
+				throw new ScriptRuntimeException("cannot parse '{0}' as a uint64", s);
+			return new LuaUInt64(parsed);
 		}
 
 		#region Arithmetic operators (checked/trapping)
