@@ -30,11 +30,16 @@ namespace MoonSharp.Interpreter
 		}
 
 		/// <summary>
-		/// Parses a decimal string into a bigint.
+		/// Parses a decimal string into a bigint. Raises a script error (never a raw CLR
+		/// FormatException, which Lua's pcall cannot catch) on unparseable input — this method
+		/// is script-reachable as a static member of the registered userdata type.
 		/// </summary>
 		public static BigInt Parse(string s)
 		{
-			return new BigInt(BigInteger.Parse(s, CultureInfo.InvariantCulture));
+			BigInteger parsed;
+			if (!BigInteger.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsed))
+				throw new ScriptRuntimeException("cannot parse '{0}' as a bigint", s);
+			return new BigInt(parsed);
 		}
 
 		#region Arithmetic operators

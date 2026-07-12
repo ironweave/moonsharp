@@ -123,5 +123,29 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.AreEqual("0", Str("return tostring(bigint.zero)"));
 			Assert.AreEqual("1", Str("return tostring(bigint.one)"));
 		}
+
+		[Test]
+		public void BigInt_StaticParseDoesNotEscapeRawClrException()
+		{
+			// bigint.zero.Parse(...) is script-reachable as a static member of the registered
+			// userdata type; unparseable input previously escaped as a raw FormatException.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return bigint.zero.Parse('zz')"));
+			Assert.IsFalse(Bool("return (pcall(function () return bigint.zero.Parse('zz') end))"));
+		}
+
+		[Test]
+		public void BigInt_ComparisonWithNonNumberIsPcallCatchable()
+		{
+			// Previously escaped as a raw ArgumentException, which pcall cannot catch and
+			// which crashes the embedding host.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return bigint(1) < 'abc'"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return bigint(1) < {}"));
+			Assert.IsFalse(Bool("return (pcall(function () return bigint(1) < 'abc' end))"));
+
+			// Error message reports the operand in Lua type terms, not CLR type names.
+			var ex = Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return bigint(1) < 'abc'"));
+			StringAssert.Contains("string", ex.Message);
+			StringAssert.DoesNotContain("String", ex.Message);
+		}
 	}
 }

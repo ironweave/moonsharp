@@ -89,5 +89,22 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64('nope')"));
 			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64(uint64('18446744073709551615'))"));
 		}
+
+		[Test]
+		public void Int64_NoRawClrExceptionsEscapeToScript()
+		{
+			// These previously escaped as raw FormatException/OverflowException/ArgumentException,
+			// which pcall cannot catch and which crash the embedding host.
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64.max.Parse('zz')"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64.max.Parse('99999999999999999999')"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64(1) < 'abc'"));
+			Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64.max.CompareTo({})"));
+			Assert.IsFalse(Bool("return (pcall(function () return int64(1) < 'abc' end))"));
+
+			// Error message reports the operand in Lua type terms, not CLR type names.
+			var ex = Assert.Throws<ScriptRuntimeException>(() => Script.RunString("return int64(1) < 'abc'"));
+			StringAssert.Contains("string", ex.Message);
+			StringAssert.DoesNotContain("String", ex.Message);
+		}
 	}
 }

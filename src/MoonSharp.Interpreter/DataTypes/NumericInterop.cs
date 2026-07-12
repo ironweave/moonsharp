@@ -74,7 +74,9 @@ namespace MoonSharp.Interpreter
 				result = (decimal)b;
 				return true;
 			}
-			// All remaining integer types and decimal itself convert exactly.
+			// All remaining integer types and decimal itself convert exactly. This relies on
+			// callers taking the float branch first: Convert.ToDecimal would OverflowException
+			// on an out-of-range double/float, so a double/float must never reach here.
 			result = Convert.ToDecimal(o, CultureInfo.InvariantCulture);
 			return true;
 		}
@@ -127,7 +129,10 @@ namespace MoonSharp.Interpreter
 
 		/// <summary>
 		/// Ordering across the numeric types, used to dispatch the comparison metamethods.
-		/// Throws for a non-numeric operand (which cannot be ordered against a number).
+		/// Raises a pcall-catchable <see cref="ScriptRuntimeException"/> for a non-numeric operand
+		/// (which cannot be ordered against a number) — never a raw CLR exception, which would
+		/// escape the interpreter into the embedding host, and reporting the operand in Lua type
+		/// terms ("string", "table", ...) rather than a CLR type name.
 		/// </summary>
 		internal static int Compare(object a, object b)
 		{
@@ -135,7 +140,13 @@ namespace MoonSharp.Interpreter
 			object ub = Unwrap(b);
 
 			if (!IsNumeric(ua) || !IsNumeric(ub))
-				throw new ArgumentException("Cannot compare a number with " + (b == null ? "nil" : b.GetType().Name));
+			{
+				// Describe a numeric operand as Lua's "number"; the non-numeric one gets its
+				// actual Lua type ("string", "table", ...). Matches Lua's own wording.
+				string ta = IsNumeric(ua) ? "number" : ua.ToLuaTypeString();
+				string tb = IsNumeric(ub) ? "number" : ub.ToLuaTypeString();
+				throw new ScriptRuntimeException("attempt to compare " + ta + " with " + tb);
+			}
 
 			if (IsFloat(ua) || IsFloat(ub))
 				return AsDouble(ua).CompareTo(AsDouble(ub));

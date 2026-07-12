@@ -105,5 +105,27 @@ namespace MoonSharp.Interpreter.Tests.EndToEnd
 			Assert.IsTrue(Bool("return uint64('18446744073709551615') == bigint('18446744073709551615')"));
 			Assert.IsFalse(Bool("return uint64('18446744073709551615') == bigint('18446744073709551614')"));
 		}
+
+		[Test]
+		public void CrossType_ExtremeMagnitudesDoNotEscapeRawClrException()
+		{
+			// NumericInterop keeps its Convert.To{Decimal,Int64} helpers safe by ordering the
+			// float branch before the decimal branch before the bigint branch, so those helpers
+			// never receive an operand type that could overflow their target. These cross-type
+			// operands span each branch boundary with magnitudes past decimal/double range; they
+			// must produce a correct result (or false equality), never a raw CLR overflow escape.
+			const string huge = "bigint('100000000000000000000000000000000000000000')"; // 1e41, past decimal range
+
+			Assert.IsTrue(Bool("return decimal(1) < " + huge));                       // decimal branch, bigint out of range
+			Assert.IsFalse(Bool("return decimal(1) == " + huge));
+			Assert.IsTrue(Bool("return decimal('79228162514264337593543950335') < " + huge)); // decimal.max vs bigger
+			Assert.IsTrue(Bool("return decimal(1) < 1e300"));                         // float branch, decimal operand
+			Assert.IsFalse(Bool("return decimal(1) == 1e300"));
+			Assert.IsTrue(Bool("return decimal(1) < math.huge"));                     // +infinity
+			Assert.IsFalse(Bool("return decimal(1) == math.huge"));
+			Assert.IsTrue(Bool("return uint64(1) > -math.huge"));
+			Assert.IsTrue(Bool("return " + huge + " > uint64('18446744073709551615')")); // bigint branch, both past double
+			Assert.IsTrue(Bool("return decimal(1) < uint64('18446744073709551615')")); // decimal branch, ulong in range
+		}
 	}
 }

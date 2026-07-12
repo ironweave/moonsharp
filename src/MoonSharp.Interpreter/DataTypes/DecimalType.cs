@@ -34,11 +34,17 @@ namespace MoonSharp.Interpreter
 		}
 
 		/// <summary>
-		/// Parses a string into a DecimalType.
+		/// Parses a string into a DecimalType. Raises a script error (never a raw CLR
+		/// FormatException/OverflowException, which Lua's pcall cannot catch) on unparseable or
+		/// out-of-range input — this method is script-reachable as a static member of the
+		/// registered userdata type.
 		/// </summary>
 		public static DecimalType Parse(string s)
 		{
-			return new DecimalType(decimal.Parse(s, NumberStyles.Any, CultureInfo.InvariantCulture));
+			decimal parsed;
+			if (!decimal.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed))
+				throw new ScriptRuntimeException("cannot parse '{0}' as a decimal", s);
+			return new DecimalType(parsed);
 		}
 
 		#region Arithmetic operators (checked/trapping)
