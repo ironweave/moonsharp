@@ -894,6 +894,23 @@ namespace MoonSharp.Interpreter.Execution.VM
 		}
 
 
+		/// <summary>
+		/// IronContract numeric hygiene for the default 'number' (double) type: a finite pair
+		/// of operands must not silently yield a non-finite result. Overflow to +/-Infinity and
+		/// invalid-operation NaN (n/0, 0/0, x%0) are trapped as a script error instead of letting
+		/// a poisoned value flow into consensus logic. A pre-existing non-finite operand (e.g.
+		/// math.huge) passes through unchanged, so the constant stays usable as a sentinel.
+		/// This deliberately departs from stock Lua, which yields inf/nan.
+		/// </summary>
+		private static double CheckFinite(double result, double a, double b, string op)
+		{
+			if (double.IsFinite(result) || !double.IsFinite(a) || !double.IsFinite(b))
+				return result;
+			if (double.IsNaN(result))
+				throw new ScriptRuntimeException("number arithmetic produced nan in '{0}' ({1} {0} {2})", op, a, b);
+			throw new ScriptRuntimeException("number overflow in '{0}' ({1} {0} {2})", op, a, b);
+		}
+
 		private int ExecAdd(Instruction i, int instructionPtr)
 		{
 			DynValue r = m_ValueStack.Pop().ToScalar();
@@ -904,7 +921,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 
 			if (ln.HasValue && rn.HasValue)
 			{
-				m_ValueStack.Push(DynValue.NewNumber(ln.Value + rn.Value));
+				m_ValueStack.Push(DynValue.NewNumber(CheckFinite(ln.Value + rn.Value, ln.Value, rn.Value, "+")));
 				return instructionPtr;
 			}
 			else
@@ -925,7 +942,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 
 			if (ln.HasValue && rn.HasValue)
 			{
-				m_ValueStack.Push(DynValue.NewNumber(ln.Value - rn.Value));
+				m_ValueStack.Push(DynValue.NewNumber(CheckFinite(ln.Value - rn.Value, ln.Value, rn.Value, "-")));
 				return instructionPtr;
 			}
 			else
@@ -947,7 +964,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 
 			if (ln.HasValue && rn.HasValue)
 			{
-				m_ValueStack.Push(DynValue.NewNumber(ln.Value * rn.Value));
+				m_ValueStack.Push(DynValue.NewNumber(CheckFinite(ln.Value * rn.Value, ln.Value, rn.Value, "*")));
 				return instructionPtr;
 			}
 			else
@@ -970,7 +987,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 			{
 				double mod = Math.IEEERemainder(ln.Value, rn.Value);
 				if (mod < 0) mod += rn.Value;
-				m_ValueStack.Push(DynValue.NewNumber(mod));
+				m_ValueStack.Push(DynValue.NewNumber(CheckFinite(mod, ln.Value, rn.Value, "%")));
 				return instructionPtr;
 			}
 			else
@@ -991,7 +1008,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 
 			if (ln.HasValue && rn.HasValue)
 			{
-				m_ValueStack.Push(DynValue.NewNumber(ln.Value / rn.Value));
+				m_ValueStack.Push(DynValue.NewNumber(CheckFinite(ln.Value / rn.Value, ln.Value, rn.Value, "/")));
 				return instructionPtr;
 			}
 			else
@@ -1011,7 +1028,7 @@ namespace MoonSharp.Interpreter.Execution.VM
 
 			if (ln.HasValue && rn.HasValue)
 			{
-				m_ValueStack.Push(DynValue.NewNumber(Math.Pow(ln.Value, rn.Value)));
+				m_ValueStack.Push(DynValue.NewNumber(CheckFinite(Math.Pow(ln.Value, rn.Value), ln.Value, rn.Value, "^")));
 				return instructionPtr;
 			}
 			else

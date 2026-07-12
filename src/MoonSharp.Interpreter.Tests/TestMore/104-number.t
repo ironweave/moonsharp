@@ -42,11 +42,16 @@ is(3.14 * 1, 3.14, "3.14 * 1")
 
 is(-7 / 0.5, -14, "-7 / 0.5")
 
-type_ok(1 / 0, 'number', "1 / 0")
+-- IronContract: a finite pair of operands must not silently yield inf/nan.
+error_like(function () return 1 / 0 end,
+           "number overflow in",
+           "1 / 0 traps instead of returning infinity")
 
 is(-25 % 3, 2, "-25 % 3")
 
-type_ok(1 % 0, 'number', "1 % 0")
+error_like(function () return 1 % 0 end,
+           "produced nan in",
+           "1 % 0 traps instead of returning nan")
 
 error_like(function () return 10 + true end,
            "^[^:]+:%d+: attempt to perform arithmetic on a boolean value",
