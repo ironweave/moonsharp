@@ -47,7 +47,14 @@ namespace MoonSharp.Interpreter.CoreLib
 							throw new ScriptRuntimeException("bad argument to '{0}' (int64 value {1} is negative and cannot be a uint64)", funcName, l);
 						return new LuaUInt64((ulong)l);
 					}
-					throw ScriptRuntimeException.BadArgument(0, funcName, "uint64, int64, number or string expected, got userdata");
+					if (v.UserData != null && v.UserData.Object is LuaUInt256)
+					{
+						System.Numerics.BigInteger b = ((LuaUInt256)v.UserData.Object).Value;
+						if (b > new System.Numerics.BigInteger(ulong.MaxValue))
+							throw new ScriptRuntimeException("bad argument to '{0}' (uint256 value does not fit in uint64)", funcName);
+						return new LuaUInt64((ulong)b);
+					}
+					throw ScriptRuntimeException.BadArgument(0, funcName, "uint64, int64, uint256, number or string expected, got userdata");
 				case DataType.Number:
 				{
 					double d = v.Number;

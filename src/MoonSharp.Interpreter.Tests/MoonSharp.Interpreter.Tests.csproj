@@ -166,6 +166,9 @@
         <None Include="TestMore\317-uint64.t">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Include="TestMore\318-uint256.t">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <None Include="TestMore\320-stdin.t">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>

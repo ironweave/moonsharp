@@ -305,6 +305,12 @@ namespace MoonSharp.Interpreter.Tests
 			TapRunner.Run(@"TestMore/317-uint64.t");
 		}
 
+		[Test]
+		public void TestMore_318_uint256()
+		{
+			TapRunner.Run(@"TestMore/318-uint256.t");
+		}
+
 		//[Test]
 		//[Ignore]
 		//public void TestMore_320_stdin()
